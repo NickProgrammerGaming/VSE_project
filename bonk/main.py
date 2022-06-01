@@ -1,6 +1,7 @@
 import pygame
 from sys import exit
 
+# test
 
 def spawn_squares():
     row_count = 3
