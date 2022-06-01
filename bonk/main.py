@@ -52,7 +52,6 @@ def check_collisions():
             if abs(square.left - ball_rect.right) < tolerance:
                 x_ball_speed *= -1
             squares_list.remove(square)
-            squares_list.clear()
     if ball_rect.y >= s_height:
         restart_screen = True
         gameplay = False
