@@ -1,56 +1,53 @@
 import pygame
 from sys import exit
 
-cols = 6
-rows = 6
+
 square_red = (242, 85, 96)
 square_green = (86, 174, 87)
 square_blue = (69, 177, 232)
-s_width = 1280
-s_height = 720
-
-class squares():
-    def __init__(self):
-        self.width = s_width // cols
-        self.height = 50
-
-    def spawn_squares(self):
-        self.squares = []
-        square_individual = []
-        for row in range(rows):
-            square_row = []
-            for col in range(cols):
-                s_x_pos = col * self.width
-                s_y_pos = row * self.height
-                square_rect = pygame.rect.Rect(s_x_pos, s_y_pos, self.width, self.height)
-                if row < 2:
-                    hp = 3
-                elif row < 4:
-                    hp = 2
-                elif row < 6:
-                    hp = 1
-                square_individual = [square_rect, hp]
-                square_row.append(square_individual)
-            self.squares.append(square_row)
-
-    def draw_squares(self):
-        for row in self.squares:
-            for square in row:
-                if square[1] == 3:
-                    square_colour = square_blue
-                elif square[1] == 2:
-                    square_colour = square_green
-                elif square[1] == 1:
-                    square_colour = square_red
-                pygame.draw.rect(screen, square_colour, square[0])
-                pygame.draw.rect(screen, "Black", (square[0]), 2)
 
 
-game_squares = squares()
-game_squares.spawn_squares()
+class Square:
+    def __init__(self, rect, hp):
+        self.rect = rect
+        self.hp = hp
 
 
-tolerance = 10
+def spawn_squares():
+    row_count = 3
+    blocks_count = 20
+    s_x_pos = 0
+    s_y_pos = 0
+    square_width = 63
+    square_height = 63
+    for row in range(0, row_count):
+        for block in range(0, blocks_count):
+            if row == 0:
+                square = Square(pygame.rect.Rect(s_x_pos, s_y_pos, square_width, square_height), 3)
+            elif row == 1:
+                square = Square(pygame.rect.Rect(s_x_pos, s_y_pos, square_width, square_height), 2)
+            elif row == 2:
+                square = Square(pygame.rect.Rect(s_x_pos, s_y_pos, square_width, square_height), 1)
+
+            squares_list.append(square)
+            s_x_pos += 64
+        s_y_pos += 64
+        s_x_pos = 0
+    global spawned
+    spawned = True
+
+
+def draw_squares():
+    for square in squares_list:
+        if square.hp == 1:
+            pygame.draw.rect(screen, square_green, square.rect)
+        elif square.hp == 2:
+            pygame.draw.rect(screen, square_blue, square.rect)
+        else:
+            pygame.draw.rect(screen, square_red, square.rect)
+
+
+tolerance = 20
 
 
 def check_collisions():
@@ -62,23 +59,28 @@ def check_collisions():
         y_ball_speed *= -1
 
     if ball_rect.colliderect(platform_rect):
-        if abs(platform_rect.top - ball_rect.bottom) < tolerance:
+        if abs(platform_rect.top - ball_rect.bottom) <= tolerance:
             y_ball_speed *= -1
-        if abs(platform_rect.right - ball_rect.left) < tolerance:
+        if abs(platform_rect.right - ball_rect.left) <= tolerance:
             x_ball_speed *= -1
-        if abs(platform_rect.left - ball_rect.right) < tolerance:
+        if abs(platform_rect.left - ball_rect.right) <= tolerance:
             x_ball_speed *= -1
     for square in squares_list:
-        if ball_rect.colliderect(square):
-            if abs(square.top - ball_rect.bottom) < tolerance:
+        if ball_rect.colliderect(square.rect):
+            if abs(square.rect.top - ball_rect.bottom) <= tolerance:
                 y_ball_speed *= -1
-            if abs(square.bottom - ball_rect.top) < tolerance:
+            if abs(square.rect.bottom - ball_rect.top) <= tolerance:
                 y_ball_speed *= -1
-            if abs(square.right - ball_rect.left) < tolerance:
+            if abs(square.rect.right - ball_rect.left) <= tolerance:
                 x_ball_speed *= -1
-            if abs(square.left - ball_rect.right) < tolerance:
+            if abs(square.rect.left - ball_rect.right) <= tolerance:
                 x_ball_speed *= -1
-            squares_list.remove(square)
+
+            square.hp -= 1
+
+            if square.hp <= 0:
+                squares_list.remove(square)
+
     if ball_rect.y >= s_height:
         restart_screen = True
         gameplay = False
@@ -95,6 +97,8 @@ def restart_game():
 
 
 pygame.init()
+s_width = 1280
+s_height = 720
 screen = pygame.display.set_mode((s_width, s_height))
 pygame.display.set_caption("Bonk")
 
@@ -164,9 +168,9 @@ while True:
 
     if gameplay:
         if not spawned:
-            game_squares.spawn_squares()
+            spawn_squares()
 
-        screen.fill("Black")
+        screen.fill((99, 99, 99, 255))
 
         if p_input[pygame.K_a]:
             platform_rect.x -= platform_move_speed
@@ -186,7 +190,7 @@ while True:
 
         check_collisions()
 
-        game_squares.draw_squares()
+        draw_squares()
 
         if len(squares_list) <= 0:
             won = True
@@ -198,3 +202,8 @@ while True:
 
     pygame.display.update()
     clock.tick(60)
+
+
+
+
+
