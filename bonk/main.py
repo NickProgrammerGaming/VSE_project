@@ -1,27 +1,53 @@
 import pygame
 from sys import exit
 
-#topki
+cols = 6
+rows = 6
+square_red = (242, 85, 96)
+square_green = (86, 174, 87)
+square_blue = (69, 177, 232)
+s_width = 1280
+s_height = 720
 
-def spawn_squares():
-    row_count = 3
-    blocks_count = 20
-    s_x_pos = 5
-    s_y_pos = 5
-    for row in range(0, row_count):
-        for block in range(0, blocks_count):
-            square_rect = pygame.rect.Rect(s_x_pos, s_y_pos, 48, 48)
-            squares_list.append(square_rect)
-            s_x_pos += 64
-        s_y_pos += 64
-        s_x_pos = 5
-    global spawned
-    spawned = True
+class squares():
+    def __init__(self):
+        self.width = s_width // cols
+        self.height = 50
+
+    def spawn_squares(self):
+        self.squares = []
+        square_individual = []
+        for row in range(rows):
+            square_row = []
+            for col in range(cols):
+                s_x_pos = col * self.width
+                s_y_pos = row * self.height
+                square_rect = pygame.rect.Rect(s_x_pos, s_y_pos, self.width, self.height)
+                if row < 2:
+                    hp = 3
+                elif row < 4:
+                    hp = 2
+                elif row < 6:
+                    hp = 1
+                square_individual = [square_rect, hp]
+                square_row.append(square_individual)
+            self.squares.append(square_row)
+
+    def draw_squares(self):
+        for row in self.squares:
+            for square in row:
+                if square[1] == 3:
+                    square_colour = square_blue
+                elif square[1] == 2:
+                    square_colour = square_green
+                elif square[1] == 1:
+                    square_colour = square_red
+                pygame.draw.rect(screen, square_colour, square[0])
+                pygame.draw.rect(screen, "Black", (square[0]), 2)
 
 
-def draw_squares():
-    for square in squares_list:
-        pygame.draw.rect(screen, "White", square)
+game_squares = squares()
+game_squares.spawn_squares()
 
 
 tolerance = 10
@@ -69,8 +95,6 @@ def restart_game():
 
 
 pygame.init()
-s_width = 1280
-s_height = 720
 screen = pygame.display.set_mode((s_width, s_height))
 pygame.display.set_caption("Bonk")
 
@@ -138,10 +162,9 @@ while True:
     if won:
         screen.blit(win_screen_surf, win_screen_rect)
 
-
     if gameplay:
         if not spawned:
-            spawn_squares()
+            game_squares.spawn_squares()
 
         screen.fill("Black")
 
@@ -163,7 +186,7 @@ while True:
 
         check_collisions()
 
-        draw_squares()
+        game_squares.draw_squares()
 
         if len(squares_list) <= 0:
             won = True
@@ -175,8 +198,3 @@ while True:
 
     pygame.display.update()
     clock.tick(60)
-
-
-
-
-
